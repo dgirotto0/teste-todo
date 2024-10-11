@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do List</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"> <!-- Ícones -->
+</head>
+<body>
+    <div class="todo-container">
+        <h2>Suas Tarefas</h2>
+
+        <!-- Exibir o nome do usuário -->
+        <div id="user-greeting" class="user-greeting"></div>
+
+        <input type="text" id="task-input" placeholder="Adicione uma nova tarefa">
+        <button id="add-task-btn" class="btn">Adicionar</button>
+        <ul id="task-list"></ul>
+    </div>
+
+    <!-- Seção de Compartilhamento -->
+    <div class="share-section">
+        <p>Convide seus amigos</p>
+        <button id="share-btn" class="btn share-btn">Compartilhar</button>
+        <button id="whatsapp-btn" class="btn whatsapp-btn">
+            <i class="fab fa-whatsapp"></i> Compartilhar no WhatsApp
+        </button>
+    </div>
+
+    <!-- Botão de Logout fora do container principal -->
+    <button id="logout-btn" class="btn logout-btn">Sair</button>
+
+    <script>
+        const accessToken = localStorage.getItem('access_token');
+
+        if (!accessToken) {
+            window.location.href = '/login';  // Redireciona para login se não houver token
+        }
+
+        // Função para decodificar o JWT e obter o nome do usuário
+        function parseJwt(token) {
+            try {
+                const base64Url = token.split('.')[1];
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                }).join(''));
+                return JSON.parse(jsonPayload);
+            } catch (e) {
+                return null;
+            }
+        }
+
+        function loadUsername() {
+            const tokenPayload = parseJwt(accessToken);
+            const userGreeting = document.getElementById('user-greeting');
+            if (tokenPayload && tokenPayload.sub) {
+                userGreeting.innerText = `Olá, ${tokenPayload.sub}`;
+            } else {
+                userGreeting.innerText = `Olá, usuário`;
+            }
+        }
+
+        // Função para carregar as tarefas
+        function loadTasks() {
+            fetch('/tasks', {
+                headers: { 'Authorization': 'Bearer ' + accessToken }
+            })
+            .then(res => res.json())
+            .then(data => {
+                const taskList = document.getElementById('task-list');
+                taskList.innerHTML = '';
+                data.tasks.forEach(task => {
+                    const li = document.createElement('li');
+                    li.textContent = task.title;
+
+                    // Ícones de check e apagar
+                    const checkBtn = document.createElement('button');
+                    checkBtn.innerHTML = '<i class="fas fa-check"></i>';
+                    checkBtn.classList.add('check-btn');
+                    checkBtn.addEventListener('click', () => completeTask(task._id, li));
+
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
+                    deleteBtn.classList.add('delete-btn');
+                    deleteBtn.addEventListener('click', () => deleteTask(task._id));
+
+                    li.appendChild(checkBtn);
+                    li.appendChild(deleteBtn);
+                    taskList.appendChild(li);
+
+                    // Verifica se a tarefa já está marcada como completa
+                    if (task.status === 'completa') {
+                        li.classList.add('completed');
+                    }
+                });
+            });
+        }
+
+        function addTask() {
+            const title = document.getElementById('task-input').value;
+            fetch('/tasks', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + accessToken
+                },
+                body: JSON.stringify({ title })
+            })
+            .then(() => {
+                document.getElementById('task-input').value = '';  // Limpa o campo
+                loadTasks();  // Recarrega a lista de tarefas
+            });
+        }
+
+        function completeTask(taskId, taskElement) {
+            fetch(`/tasks/${taskId}`, {
+                method: 'PUT',
+                headers: { 'Authorization': 'Bearer ' + accessToken }
+            })
+            .then(() => {
+                taskElement.classList.add('completed');
+            });
+        }
+
+        function deleteTask(taskId) {
+            fetch(`/tasks/${taskId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': 'Bearer ' + accessToken }
+            })
+            .then(() => {
+                loadTasks();  // Recarrega a lista de tarefas após exclusão
+            });
+        }
+
+        // Logout: Limpa o token e redireciona para a página de login
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            localStorage.removeItem('access_token');  // Remove o token
+            window.location.href = '/login';  // Redireciona para a página de login
+        });
+
+        // Função de Compartilhamento
+        document.getElementById('share-btn').addEventListener('click', () => {
+            const shareText = 'Deixe seu dia mais organizado! Venha conhecer o To-Do e ter mais controle da sua vida.';
+            const shareUrl = window.location.origin + '/';
+            if (navigator.share) {
+                navigator.share({
+                    title: 'To-Do List',
+                    text: shareText,
+                    url: shareUrl
+                });
+            } else {
+                alert(`Compartilhe este link: ${shareUrl}`);
+            }
+        });
+
+        // Compartilhar via WhatsApp
+        document.getElementById('whatsapp-btn').addEventListener('click', () => {
+            const whatsappText = encodeURIComponent('Deixe seu dia mais organizado! Venha conhecer o To-Do e ter mais controle da sua vida: ' + window.location.origin + '/');
+            window.open(`https://wa.me/?text=${whatsappText}`, '_blank');
+        });
+
+        document.getElementById('add-task-btn').addEventListener('click', addTask);
+        loadTasks();
+        loadUsername();  // Exibir o nome do usuário após carregar a página
+    </script>
+</body>
+</html>

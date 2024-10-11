@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="auth-container">
+        <h2>Registre-se</h2>
+        <input type="text" id="register-username" placeholder="Usuário">
+        <input type="password" id="register-password" placeholder="Senha">
+        <button id="register-btn" class="btn">Registrar</button>
+    </div>
+
+    <script>
+        document.getElementById('register-btn').addEventListener('click', function() {
+            const username = document.getElementById('register-username').value;
+            const password = document.getElementById('register-password').value;
+
+            fetch('/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.message === 'Usuário criado com sucesso') {
+                    window.location.href = '/login';  // Redireciona para a página de login após o registro
+                } else {
+                    alert('Erro no registro');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

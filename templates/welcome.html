@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bem-vindo ao To-Do App</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='animations.css') }}">
+</head>
+<body>
+    <div class="welcome-container">
+        <h1 class="welcome-title">Bem-vindo ao To-Do List</h1>
+        <button id="continue-btn" class="btn">Continuar</button>
+    </div>
+    <script>
+        document.getElementById('continue-btn').addEventListener('click', function() {
+            window.location.href = '/login'; // Efeito de transição para a página de login
+        });
+    </script>
+</body>
+</html>

@@ -154,6 +154,7 @@ ul {
     list-style-type: none;
     padding: 0;
     margin: 20px 0;
+    width: 100%;
 }
 
 ul li {
@@ -181,7 +182,8 @@ ul li:hover {
 
 .check-btn {
     color: #58cc02;
-    margin-right: 10px;
+    position: absolute;
+    right: 18%;
 }
 
 .check-btn:hover {
@@ -190,6 +192,8 @@ ul li:hover {
 
 .delete-btn {
     color: #ff4d4d;
+    position: absolute;
+    right: 10%;
 }
 
 .delete-btn:hover {

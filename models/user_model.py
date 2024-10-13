@@ -16,5 +16,12 @@ class UserModel:
         return users_collection.find_one({'username': username})
 
     def save_to_db(self):
-        users_collection.insert_one({'username': self.username, 'password': self.password, 'apelido': self.apelido})
+        users_collection.insert_one({
+            'username': self.username,
+            'password': self.password,
+            'apelido': self.apelido
+        })
 
+    @classmethod
+    def get_user_by_username(cls, username):
+        return users_collection.find_one({'username': username}, {'_id': 0, 'apelido': 1})

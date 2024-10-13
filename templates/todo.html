@@ -56,7 +56,7 @@
             const tokenPayload = parseJwt(accessToken);
             const userGreeting = document.getElementById('user-greeting');
             if (tokenPayload && tokenPayload.sub) {
-                userGreeting.innerText = `Olá, ${tokenPayload.sub}`;
+                userGreeting.innerText = `Olá, ${tokenPayload.sub}`;  // Exibe o apelido
             } else {
                 userGreeting.innerText = `Olá, usuário`;
             }
@@ -100,6 +100,13 @@
 
         function addTask() {
             const title = document.getElementById('task-input').value;
+
+            // Limitar a tarefa para no máximo 100 caracteres
+            if (title.length > 100) {
+                alert('A tarefa não pode ter mais de 100 caracteres.');
+                return;
+            }
+
             fetch('/tasks', {
                 method: 'POST',
                 headers: { 
@@ -163,7 +170,7 @@
 
         document.getElementById('add-task-btn').addEventListener('click', addTask);
         loadTasks();
-        loadUsername();  // Exibir o nome do usuário após carregar a página
+        loadUsername();  
     </script>
 </body>
 </html>

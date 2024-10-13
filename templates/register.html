@@ -10,7 +10,9 @@
     <div class="auth-container">
         <h2>Registre-se</h2>
         <input type="text" id="register-username" placeholder="Usuário">
+        <input type="text" id="apelido" placeholder="Seu Apelido"> 
         <input type="password" id="register-password" placeholder="Senha">
+        
         <button id="register-btn" class="btn">Registrar</button>
     </div>
 
@@ -18,18 +20,23 @@
         document.getElementById('register-btn').addEventListener('click', function() {
             const username = document.getElementById('register-username').value;
             const password = document.getElementById('register-password').value;
+            const apelido = document.getElementById('apelido').value;
 
             fetch('/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password })
+                body: JSON.stringify({ username, password, apelido })
             })
             .then(res => res.json())
             .then(data => {
                 if (data.message === 'Usuário criado com sucesso') {
                     window.location.href = '/login';  // Redireciona para a página de login após o registro
                 } else {
-                    alert('Erro no registro');
+                    if (data.message) {
+                        alert(data.message);  // Exibir a mensagem de erro vinda do backend, como 'Usuário já existe'
+                    } else {
+                        alert('Erro desconhecido. Tente novamente.');
+                    }
                 }
             });
         });

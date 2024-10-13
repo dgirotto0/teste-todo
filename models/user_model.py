@@ -1,6 +1,7 @@
 from pymongo import MongoClient
+import os
 
-client = MongoClient('localhost', 27017)
+client = MongoClient(os.getenv('MONGODB_URI'))
 db = client['todo_db']
 users_collection = db['users']
 

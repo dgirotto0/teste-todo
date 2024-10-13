@@ -1,6 +1,8 @@
 from pymongo import MongoClient
+import os
 
-client = MongoClient('localhost', 27017)
+# Usar a variável de ambiente MONGODB_URI para obter a URL do MongoDB Atlas
+client = MongoClient(os.getenv('MONGODB_URI'))
 db = client['todo_db']
 tasks_collection = db['tasks']
 
